@@ -1,3 +1,12 @@
-fn main() {
-    println!("Hello, world!");
+use tokio::net::TcpListener;
+use axum::{serve, Router};
+use axum::routing::get;
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+
+    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+
+    serve(listener, app).await.unwrap();
 }
