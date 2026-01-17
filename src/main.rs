@@ -1,6 +1,6 @@
 use tokio::net::TcpListener;
 use axum::{serve, Router};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum_test::TestServer;
 
 #[tokio::main]
@@ -23,3 +23,22 @@ async fn test() {
     response.assert_text("Hello, World!");
 }
 
+#[tokio::test]
+async fn test_method_routing() {
+    async fn hello_world() -> String {
+        "Hello, World!".to_string()
+    }
+
+    let app = Router::new()
+        .route("/get", get(hello_world))
+        .route("/post", post(hello_world));
+
+    let server = TestServer::new(app).unwrap();
+    let response = server.get("/get").await;
+    response.assert_status_ok();
+    response.assert_text("Hello, World!");
+
+    let response = server.post("/post").await;
+    response.assert_status_ok();
+    response.assert_text("Hello, World!");
+}
